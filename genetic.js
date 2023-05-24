@@ -72,7 +72,7 @@ function fitness(streets, transitStreet, transitExceptions) {
     return ratRuns.length;
 }
 
-function searchBestFit(streets, transitStreet, transitExceptions) {
+function searchBestFit(streets, transitStreet, transitExceptions, callbackNewBestFitness) {
     let bestStreets = streets;
     let bestFitness = fitness(streets, transitStreet, transitExceptions);
     console.log("Fitness : " + bestFitness);
@@ -89,6 +89,10 @@ function searchBestFit(streets, transitStreet, transitExceptions) {
             console.log("Fitness : " + new_fitness);
             bestFitness = new_fitness;
             bestStreets = new_streets;
+
+            if ( typeof callbackNewBestFitness == "function" ){
+                callbackNewBestFitness(bestStreets, bestFitness);
+            }
         }
     }
 

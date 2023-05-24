@@ -380,6 +380,13 @@ function loadHostedGeojson(geojsonFilename) {
 }
 
 
+function updateStreetsAndFitness(new_streets, new_fitness)
+{
+    document.getElementById("fitness").innerText = new_fitness;
+    streets = new_streets;
+    updateStreets();
+}
+
 // Load points in geojson file and markers
 const fileInput = document.getElementById('fileInput');
 fileInput.addEventListener('change', function() {
@@ -406,7 +413,7 @@ displayButton.addEventListener("click", function() {
 
 const geneticButton = document.getElementById("genetic");
 geneticButton.addEventListener("click", function() {
-    streets = searchBestFit(streets, transitStreet, transitExceptions);
+    streets = searchBestFit(streets, transitStreet, transitExceptions, updateStreetsAndFitness);
     updateStreets();
     refreshRatRuns();
     displayRatRuns();
