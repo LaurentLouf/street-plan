@@ -1,12 +1,12 @@
 const LOG_LEVEL_GENETIC = 0;
 
-function randomizeStreets(streets, number_changes)
+function mutateStreetsLayout(streets_layout, number_changes)
 {
     for (var i_change = 0; i_change < number_changes; i_change++)
     {
         let type_of_change = Math.floor(Math.random() * 4);
-        let streetIndex = Math.floor(Math.random() * streets.getLayers().length);
-        let street = streets.getLayers()[streetIndex];
+        let street_index = Math.floor(Math.random() * streets_layout.getLayers().length);
+        let street = streets_layout.getLayers()[street_index];
         // Set direction to 'base'
         if ( type_of_change == 0 )
         {
@@ -33,14 +33,14 @@ function randomizeStreets(streets, number_changes)
         }
     }
 
-    return streets;
+    return streets_layout;
 }
 
 // The current formula for the fitness is :
 //   - Fitness = number of rat runs
-function fitness(streets, transitStreet, transitExceptions) {
+function fitness(streets_layout, transit_streets, transit_exceptions) {
     let pairs = [];
-    streets.eachLayer(function(polyline){
+    streets_layout.eachLayer(function(polyline){
         let direction = polyline['_direction'];
         let start = polyline['_point_start'];
         let end = polyline['_point_end'];
@@ -56,34 +56,34 @@ function fitness(streets, transitStreet, transitExceptions) {
     });
 
     let graph = buildGraphfromPairs(pairs);
-    let ratRuns = getRatRuns(graph, transitStreet, transitExceptions);
+    let ratRuns = getRatRuns(graph, transit_streets, transit_exceptions);
 
     return ratRuns.length;
 }
 
-function searchBestFit(streets, transitStreet, transitExceptions, callbackNewBestFitness) {
-    let bestStreets = streets;
-    let bestFitness = fitness(streets, transitStreet, transitExceptions);
-    console.log("Fitness : " + bestFitness);
+function searchBestFit(streets_layout, transit_streets, transit_exceptions, callbackNewBestFitness) {
+    let best_streets_layout = streets_layout;
+    let best_fitness = fitness(streets_layout, transit_streets, transit_exceptions);
+    console.log("Fitness : " + best_fitness);
 
     let iteration = 0;
     for ( iteration = 0; iteration < 100 ; iteration++ )
     {
         console.log("Iteration n°" + iteration)
-        let new_streets = streets;
-        new_streets = randomizeStreets(new_streets, Math.floor(Math.random() * streets.getLayers().length))
-        let new_fitness = fitness(new_streets, transitStreet, transitExceptions);
-        if ( new_fitness < bestFitness )
+        let new_streets = streets_layout;
+        new_streets = mutateStreetsLayout(new_streets, Math.floor(Math.random() * streets_layout.getLayers().length))
+        let new_fitness = fitness(new_streets, transit_streets, transit_exceptions);
+        if ( new_fitness < best_fitness )
         {
             console.log("Fitness : " + new_fitness);
-            bestFitness = new_fitness;
-            bestStreets = new_streets;
+            best_fitness = new_fitness;
+            best_streets_layout = new_streets;
 
             if ( typeof callbackNewBestFitness == "function" ){
-                callbackNewBestFitness(bestStreets, bestFitness);
+                callbackNewBestFitness(best_streets_layout, best_fitness);
             }
         }
     }
 
-    return bestStreets;
+    return best_streets_layout;
 }
