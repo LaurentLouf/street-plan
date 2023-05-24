@@ -99,6 +99,46 @@ function addDoubleArrow(polyline, arrowColor) {
     polyline._polyline2 = polyline2;
 }
 
+function updateStreets() {
+    streets.eachLayer(function(polyline){
+        var arrowColor;
+        if ( polyline._direction != Direction.DOUBLE && (typeof polyline._polyline2) != "undefined" )
+        {
+            polyline._polyline2.remove();
+        }
+
+        if (polyline._direction === Direction.REVERSE) {
+            arrowColor = "green";
+            polyline.setStyle({color : arrowColor});
+            polyline.setLatLngs(polyline.getLatLngs().reverse()); // also applies the style changes to the arrowhead
+        } else if (polyline._direction === Direction.DOUBLE) {
+            arrowColor = (polyline._base === Direction.DOUBLE) ? "blue" : "green";
+            polyline.setStyle({color : arrowColor});
+            polyline.setLatLngs(polyline.getLatLngs().reverse()); // reset
+
+            // Set double-arrow
+            addDoubleArrow(polyline, arrowColor);
+        } else if (polyline._direction === Direction.NONE) {
+            arrowColor = (polyline._base === Direction.NONE) ? "blue" : "green";
+            polyline.setStyle({color : arrowColor, dashArray: Constant.MODAL_FILTER_DASH });
+
+            if ( typeof polyline._arrowheads != "undefined")
+            {
+                polyline.getArrowheads().remove();
+            }
+        } else if (polyline._direction === Direction.BASE) {
+            arrowColor = (polyline._base === Direction.BASE) ? "blue" : "green";
+            if ( typeof polyline._arrowheads == "undefined")
+            {
+                polyline.arrowheads(arrowSettings);
+            }
+            polyline.getArrowheads().addTo(map);
+            polyline.setStyle({color : arrowColor, dashArray: ''});
+            polyline.setLatLngs(polyline.getLatLngs());
+        }
+    });
+}
+
 function reverseArrow(ev) {
     var polyline = ev.target;
 
@@ -367,6 +407,7 @@ displayButton.addEventListener("click", function() {
 const geneticButton = document.getElementById("genetic");
 geneticButton.addEventListener("click", function() {
     streets = searchBestFit(streets, transitStreet, transitExceptions);
+    updateStreets();
     refreshRatRuns();
     displayRatRuns();
 });
