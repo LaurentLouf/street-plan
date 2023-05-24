@@ -11,85 +11,82 @@ function otherDirectionExists(pairs, pair) {
     return false;
 }
 
-function randomizePairs(pairs, number_changes)
+function randomizeStreets(streets, number_changes)
 {
     for (var i_change = 0; i_change < number_changes; i_change++)
     {
-        let type_of_change = Math.floor(Math.random() * 3);
-        let number_pairs = pairs.length;
-        // Delete a direction
+        let type_of_change = Math.floor(Math.random() * 4);
+        let streetIndex = Math.floor(Math.random() * streets.getLayers().length);
+        let street = streets.getLayers()[streetIndex];
+        // Set direction to 'base'
         if ( type_of_change == 0 )
         {
-            let index = Math.floor(Math.random() * number_pairs);
-            pairs.splice(index, 1);
-            // console.log("Deleted pair at index " + index);
+            street._direction = 'base';
         }
-        // Invert a direction
+        // Set direction to 'reverse'
         else if ( type_of_change == 1 )
         {
-            // Don't invert a direction whose contrary already exists
-            let index = 0;
-            let attempts = 0;
-            do {
-                index = Math.floor(Math.random() * number_pairs);
-                attempts++;
-            } while (otherDirectionExists(pairs, pairs[index]) == true && attempts < 100) ;
-
-            if ( attempts < 100 )
-            {
-                let first_element = pairs[index][0];
-                pairs[index][0] = pairs[index][1];
-                pairs[index][1] = first_element;
-                // console.log("Inverted pair at index " + index);
-            }
+            street._direction = 'reverse';
         }
-        // Add a direction
+        // Set direction to 'double'
         else if ( type_of_change == 2 )
         {
-            // Don't add a direction whose contrary already exists
-            let index = 0;
-            let attempts = 0;
-            do {
-                index = Math.floor(Math.random() * number_pairs);
-                attempts++;
-            } while (otherDirectionExists(pairs, pairs[index]) == true && attempts < 100) ;
-
-            if ( attempts < 100 )
-            {
-                pairs.push([pairs[index][1], pairs[index][0]]);
-            }
+            street._direction = 'double';
+        }
+        // Set direction to 'none'
+        else if ( type_of_change == 3 )
+        {
+            street._direction = 'none';
         }
     }
 
-    return pairs;
+    return streets;
 }
 
-function fitness(pairs, transitStreet, transitExceptions) {
+// The current formula for the fitness is :
+//   - Fitness = number of rat runs
+function fitness(streets, transitStreet, transitExceptions) {
+    let pairs = [];
+    streets.eachLayer(function(polyline){
+        let direction = polyline['_direction'];
+        let start = polyline['_point_start'];
+        let end = polyline['_point_end'];
+
+        if (direction === Direction.BASE) {
+            pairs.push([start, end]);
+        } else if (direction === Direction.REVERSE) {
+            pairs.push([end, start]);
+        } else if (direction === Direction.DOUBLE) {
+            pairs.push([start, end]);
+            pairs.push([end, start]);
+        }
+    });
+
     let graph = buildGraphfromPairs(pairs);
     let ratRuns = getRatRuns(graph, transitStreet, transitExceptions);
 
     return ratRuns.length;
 }
 
-function searchBestFit(pairs, transitStreet, transitExceptions) {
-    let bestPairs = pairs;
-    let bestFitness = fitness(pairs, transitStreet, transitExceptions);
+function searchBestFit(streets, transitStreet, transitExceptions) {
+    let bestStreets = streets;
+    let bestFitness = fitness(streets, transitStreet, transitExceptions);
     console.log("Fitness : " + bestFitness);
 
     let iteration = 0;
     for ( iteration = 0; iteration < 100 ; iteration++ )
     {
         console.log("Iteration n°" + iteration)
-        let new_pairs = pairs;
-        new_pairs = randomizePairs(new_pairs, Math.floor(Math.random() * pairs.length))
-        let new_fitness = fitness(new_pairs, transitStreet, transitExceptions);
+        let new_streets = streets;
+        new_streets = randomizeStreets(new_streets, Math.floor(Math.random() * streets.getLayers().length))
+        let new_fitness = fitness(new_streets, transitStreet, transitExceptions);
         if ( new_fitness < bestFitness )
         {
             console.log("Fitness : " + new_fitness);
             bestFitness = new_fitness;
-            bestPairs = new_pairs;
+            bestStreets = new_streets;
         }
     }
 
-    return bestPairs;
+    return bestStreets;
 }

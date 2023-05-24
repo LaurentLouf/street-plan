@@ -366,25 +366,7 @@ displayButton.addEventListener("click", function() {
 
 const geneticButton = document.getElementById("genetic");
 geneticButton.addEventListener("click", function() {
-    let pairs = [];
-    streets.eachLayer(function(polyline){
-        let direction = polyline['_direction'];
-        let start = polyline['_point_start'];
-        let end = polyline['_point_end'];
-
-        if (direction === Direction.BASE) {
-            pairs.push([start, end]);
-        } else if (direction === Direction.REVERSE) {
-            pairs.push([end, start]);
-        } else if (direction === Direction.DOUBLE) {
-            pairs.push([start, end]);
-            pairs.push([end, start]);
-        }
-    });
-
-    pairs = searchBestFit(pairs, transitStreet, transitExceptions);
-    let graph = buildGraphfromPairs(pairs);
-    let ratRuns = getRatRuns(graph, transitStreet, transitExceptions);
-    markRatRuns(streets, ratRuns);
+    streets = searchBestFit(streets, transitStreet, transitExceptions);
+    refreshRatRuns();
     displayRatRuns();
 });
