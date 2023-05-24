@@ -1,16 +1,5 @@
 const LOG_LEVEL_GENETIC = 0;
 
-function otherDirectionExists(pairs, pair) {
-    var i_pair;
-    for ( i_pair = 0; i_pair < pairs.length; i_pair++)
-    {
-        if ( pairs[i_pair][0] == pair[1] && pairs[i_pair][1] == pair[0] )
-            return true;
-    }
-
-    return false;
-}
-
 function randomizeStreets(streets, number_changes)
 {
     for (var i_change = 0; i_change < number_changes; i_change++)
