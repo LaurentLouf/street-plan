@@ -1,4 +1,4 @@
-
+const LOG_LEVEL_GENETIC = 0;
 
 function otherDirectionExists(pairs, pair) {
     var i_pair;
@@ -21,21 +21,25 @@ function randomizeStreets(streets, number_changes)
         // Set direction to 'base'
         if ( type_of_change == 0 )
         {
+            if ( LOG_LEVEL_GENETIC >= 2 ) console.log("Set direction of " + street._leaflet_id + " to base");
             street._direction = 'base';
         }
         // Set direction to 'reverse'
         else if ( type_of_change == 1 )
         {
+            if ( LOG_LEVEL_GENETIC >= 2 ) console.log("Set direction of " + street._leaflet_id + " to reverse");
             street._direction = 'reverse';
         }
         // Set direction to 'double'
         else if ( type_of_change == 2 )
         {
+            if ( LOG_LEVEL_GENETIC >= 2 ) console.log("Set direction of " + street._leaflet_id + " to double");
             street._direction = 'double';
         }
         // Set direction to 'none'
         else if ( type_of_change == 3 )
         {
+            if ( LOG_LEVEL_GENETIC >= 2 ) console.log("Set direction of " + street._leaflet_id + " to none");
             street._direction = 'none';
         }
     }
