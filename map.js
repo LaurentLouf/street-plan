@@ -132,9 +132,9 @@ function updateStreets() {
             {
                 polyline.arrowheads(arrowSettings);
             }
-            polyline.getArrowheads().addTo(map);
             polyline.setStyle({color : arrowColor, dashArray: ''});
-            polyline.setLatLngs(polyline.getLatLngs());
+            polyline.setLatLngs(polyline.getLatLngs()); // Force redraw the polyline to display the arrow heads
+            polyline.getArrowheads().addTo(map);
         }
     });
 }
