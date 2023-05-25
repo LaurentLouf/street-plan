@@ -13,10 +13,10 @@ const Constant = {
 }
 
 const Direction = {
-    BASE: 'base',
-    REVERSE: 'reverse',
-    DOUBLE: 'double',
-    NONE: 'none'
+    BASE: 1,
+    REVERSE: -1,
+    DOUBLE: 2,
+    NONE: 0
 };
 
 const arrowSettings = {
