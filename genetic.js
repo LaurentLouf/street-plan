@@ -1,5 +1,6 @@
 const LOG_LEVEL_GENETIC = 0;
 const POPULATION_SIZE = 5;
+const NUMBER_GENERATIONS = 1000;
 
 function simplifyStreetLayoutStructure(streets_layout)
 {
@@ -118,7 +119,7 @@ function searchBestFit(streets_layout, transit_streets, transit_exceptions, coef
     // Iterate
     let population = Array(POPULATION_SIZE).fill({"layout": simplified_layout, "fitness": 0});
     let iteration = 0;
-    for ( iteration = 0; iteration < 100 ; iteration++ )
+    for ( iteration = 0; iteration < NUMBER_GENERATIONS ; iteration++ )
     {
         // Add new individuals by mutating existing individuals
         let mutated_population = JSON.parse(JSON.stringify(population));
