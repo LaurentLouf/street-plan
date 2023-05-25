@@ -26,7 +26,7 @@ const arrowSettings = {
     yawn: 30
 };
 
-const LOG_LEVEL = 1;
+const LOG_LEVEL = 0;
 
 let dict = {};
 let streets = L.featureGroup();

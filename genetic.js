@@ -120,8 +120,6 @@ function searchBestFit(streets_layout, transit_streets, transit_exceptions, call
     let iteration = 0;
     for ( iteration = 0; iteration < 100 ; iteration++ )
     {
-        console.log("Iteration n°" + iteration);
-
         // Add new individuals by mutating existing individuals
         let mutated_population = JSON.parse(JSON.stringify(population));
         for ( var i_individual = 0; i_individual < POPULATION_SIZE ; i_individual++)
@@ -151,7 +149,7 @@ function searchBestFit(streets_layout, transit_streets, transit_exceptions, call
         // See if the best fitness has improved
         if ( population[0].fitness < best_individual.fitness )
         {
-            console.log("Fitness : " + population[0].fitness);
+            console.log("Fitness : " + population[0].fitness + " at iteration " + iteration);
             best_individual = population[0];
 
             if ( typeof callbackNewBestFitness == "function" ){
