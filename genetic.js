@@ -1,4 +1,5 @@
 const LOG_LEVEL_GENETIC = 0;
+const POPULATION_SIZE = 5;
 
 function simplifyStreetLayoutStructure(streets_layout)
 {
@@ -117,28 +118,57 @@ function fitness(streets_layout, transit_streets, transit_exceptions) {
 }
 
 function searchBestFit(streets_layout, transit_streets, transit_exceptions, callbackNewBestFitness) {
-    let best_streets_layout = streets_layout;
-    let best_fitness = fitness(streets_layout, transit_streets, transit_exceptions);
-    console.log("Fitness : " + best_fitness);
+    let simplified_layout = simplifyStreetLayoutStructure(streets_layout);
+    let best_individual = {"layout": simplified_layout, "fitness": 0};
+    best_individual.fitness = fitness(best_individual.layout, transit_streets, transit_exceptions);
+    console.log("Fitness : " + best_individual.fitness);
 
+    // Iterate
+    let population = Array(POPULATION_SIZE).fill({"layout": simplified_layout, "fitness": 0});
     let iteration = 0;
     for ( iteration = 0; iteration < 100 ; iteration++ )
     {
-        console.log("Iteration n°" + iteration)
-        let new_streets = streets_layout;
-        new_streets = mutateStreetsLayout(new_streets, Math.floor(Math.random() * streets_layout.getLayers().length))
-        let new_fitness = fitness(new_streets, transit_streets, transit_exceptions);
-        if ( new_fitness < best_fitness )
-        {
-            console.log("Fitness : " + new_fitness);
-            best_fitness = new_fitness;
-            best_streets_layout = new_streets;
+        console.log("Iteration n°" + iteration);
 
-            if ( typeof callbackNewBestFitness == "function" ){
-                callbackNewBestFitness(best_streets_layout, best_fitness);
+        // Add new individuals by mutating existing individuals
+        let mutated_population = JSON.parse(JSON.stringify(population));
+        for ( var i_individual = 0; i_individual < POPULATION_SIZE ; i_individual++)
+        {
+            mutated_population[i_individual].layout = mutateStreetsLayout(mutated_population[i_individual].layout, Math.floor(Math.random() * population[0].layout.layers.length));
+        }
+        population = population.concat(mutated_population);
+
+
+        // Breed all individuals together
+        var population_before_breeding = population.length;
+        for ( var i_parent_1 = 0; i_parent_1 < population_before_breeding ; i_parent_1++)
+        {
+            for ( var i_parent_2 = i_parent_1 + 1; i_parent_2 < population_before_breeding; i_parent_2++ )
+            {
+                population.push({"layout": breedStreetsLayout(JSON.parse(JSON.stringify(population[i_parent_1])).layout, JSON.parse(JSON.stringify(population[i_parent_2])).layout), "fitness": 0});
             }
         }
+
+        // Get fitness for all the population
+        for ( var i_individual = 0; i_individual < population.length ; i_individual++)
+        {
+            population[i_individual].fitness = fitness(population[i_individual].layout, transit_streets, transit_exceptions);
+        }
+        population.sort((individual_1, individual_2) => individual_1.fitness > individual_2.fitness);
+
+        // See if the best fitness has improved
+        if ( population[0].fitness < best_individual.fitness )
+        {
+            console.log("Fitness : " + population[0].fitness);
+            best_individual = population[0];
+
+            if ( typeof callbackNewBestFitness == "function" ){
+                callbackNewBestFitness(best_individual.layout, best_individual.fitness);
+            }
+        }
+
+        // Selection process : just keep the better individuals
+        population = population.slice(0, POPULATION_SIZE);
     }
 
-    return best_streets_layout;
 }
