@@ -3,29 +3,21 @@ const POPULATION_SIZE = 5;
 
 function simplifyStreetLayoutStructure(streets_layout)
 {
-    let layers = streets_layout.getLayers();
-    streets_layout.layers = [];
-    for ( var i_layer = 0; i_layer < layers.length; i_layer++ )
+    let layers = [];
+    for ( var i_layer = 0; i_layer < streets_layout.getLayers().length; i_layer++ )
     {
-        let direction = layers[i_layer]['_direction'];
-        let start = layers[i_layer]['_point_start'];
-        let end = layers[i_layer]['_point_end'];
-        let base = layers[i_layer]['_base'];
+        let direction = streets_layout.getLayers()[i_layer]['_direction'];
+        let start = streets_layout.getLayers()[i_layer]['_point_start'];
+        let end = streets_layout.getLayers()[i_layer]['_point_end'];
+        let base = streets_layout.getLayers()[i_layer]['_base'];
 
-        streets_layout.layers.push({
+        layers.push({
             "direction": direction, "base": base,
             "start": start, "end": end,
-            "id": layers[i_layer]._leaflet_id});
+            "id": streets_layout.getLayers()[i_layer]._leaflet_id});
     }
 
-    delete streets_layout._map;
-    delete streets_layout._mapToAdd;
-    delete streets_layout.options;
-    delete streets_layout._initHooksCalled;
-    delete streets_layout._zoomAnimated;
-    delete streets_layout._layers;
-    delete streets_layout._leaflet_id;
-    return streets_layout;
+    return {"layers": layers};
 }
 
 function mutateStreetsLayout(streets_layout, number_changes)
