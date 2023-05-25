@@ -109,12 +109,22 @@ function updateStreets() {
 
         if (polyline._direction === Direction.REVERSE) {
             arrowColor = "green";
+            if ( typeof polyline._arrowheads == "undefined")
+            {
+                polyline.arrowheads(arrowSettings);
+            }
             polyline.setStyle({color : arrowColor});
             polyline.setLatLngs(polyline.getLatLngs().reverse()); // also applies the style changes to the arrowhead
+            polyline.getArrowheads().addTo(map);
         } else if (polyline._direction === Direction.DOUBLE) {
             arrowColor = (polyline._base === Direction.DOUBLE) ? "blue" : "green";
+            if ( typeof polyline._arrowheads == "undefined")
+            {
+                polyline.arrowheads(arrowSettings);
+            }
             polyline.setStyle({color : arrowColor});
             polyline.setLatLngs(polyline.getLatLngs().reverse()); // reset
+            polyline.getArrowheads().addTo(map);
 
             // Set double-arrow
             addDoubleArrow(polyline, arrowColor);
