@@ -163,4 +163,5 @@ function searchBestFit(streets_layout, transit_streets, transit_exceptions, call
         population = population.slice(0, POPULATION_SIZE);
     }
 
+    return best_individual.layout;
 }
