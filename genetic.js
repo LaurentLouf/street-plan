@@ -74,7 +74,7 @@ function breedStreetsLayout(street_layout_parent_1, street_layout_parent_2)
 //   - Fitness = number of rat runs
 //                  + 0.5 * number of changes from initial plan
 //                  + 5 * number of streets_layout where traffic is cut
-function fitness(streets_layout, transit_streets, transit_exceptions) {
+function fitness(streets_layout, transit_streets, transit_exceptions, coeffs) {
     let pairs = [];
     let number_changes = 0;
     let number_cut_traffic = 0;
@@ -106,13 +106,13 @@ function fitness(streets_layout, transit_streets, transit_exceptions) {
     let graph = buildGraphfromPairs(pairs);
     let ratRuns = getRatRuns(graph, transit_streets, transit_exceptions);
 
-    return ratRuns.length + 0.1 * number_changes + 5 * number_cut_traffic;
+    return ratRuns.length * coeffs.rat_run + number_changes * coeffs.change + number_cut_traffic * coeffs.cut;
 }
 
-function searchBestFit(streets_layout, transit_streets, transit_exceptions, callbackNewBestFitness) {
+function searchBestFit(streets_layout, transit_streets, transit_exceptions, coeffs, callbackNewBestFitness) {
     let simplified_layout = simplifyStreetLayoutStructure(streets_layout);
     let best_individual = {"layout": simplified_layout, "fitness": 0};
-    best_individual.fitness = fitness(best_individual.layout, transit_streets, transit_exceptions);
+    best_individual.fitness = fitness(best_individual.layout, transit_streets, transit_exceptions, coeffs);
     console.log("Fitness : " + best_individual.fitness);
 
     // Iterate
@@ -142,7 +142,7 @@ function searchBestFit(streets_layout, transit_streets, transit_exceptions, call
         // Get fitness for all the population
         for ( var i_individual = 0; i_individual < population.length ; i_individual++)
         {
-            population[i_individual].fitness = fitness(population[i_individual].layout, transit_streets, transit_exceptions);
+            population[i_individual].fitness = fitness(population[i_individual].layout, transit_streets, transit_exceptions, coeffs);
         }
         population.sort((individual_1, individual_2) => individual_1.fitness > individual_2.fitness);
 

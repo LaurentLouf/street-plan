@@ -432,7 +432,8 @@ displayButton.addEventListener("click", function() {
 
 const geneticButton = document.getElementById("genetic");
 geneticButton.addEventListener("click", function() {
-    best_streets_layout = searchBestFit(streets, transitStreet, transitExceptions, updateStreetsAndFitness);
+    let coeffs = {"rat_run": Number(document.getElementById("rat-run-coef").value), "change": Number(document.getElementById("change-coef").value), "cut": Number(document.getElementById("cut-coef").value)};
+    best_streets_layout = searchBestFit(streets, transitStreet, transitExceptions, coeffs, updateStreetsAndFitness);
     updateStreets(best_streets_layout);
     refreshRatRuns();
     displayRatRuns();

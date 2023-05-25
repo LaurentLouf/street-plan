@@ -13,6 +13,12 @@
         <button id="display-rat-runs">Afficher</button>
         <button id="clear-rat-runs">Effacer</button>
         <button id="genetic">Résoudre</button>
+      </div>
+      <div>
+        <p>Option algorithme résolution</p>
+        <label for="rat-run-coef">Coefficient rat-run : <input type="number" id="rat-run-coef" min="0" max="10" value="1" step="0.1"></label>
+        <label for="change-coef">Coefficient nombre de changements : <input type="number" id="change-coef" min="0" max="10" value="0.1" step="0.1"></label>
+        <label for="cut-coef">Coefficient rue piétonne : <input type="number" id="cut-coef" min="0" max="10" value="5" step="0.1"></label>
         <p id="fitness"></p>
       </div>
       <div id="rat-run-output"></div>
