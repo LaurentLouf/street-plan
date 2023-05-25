@@ -99,7 +99,17 @@ function addDoubleArrow(polyline, arrowColor) {
     polyline._polyline2 = polyline2;
 }
 
-function updateStreets() {
+function updateStreets(street_layout) {
+    for ( var i_street = 0 ; i_street < street_layout.layers.length; i_street++)
+    {
+        let leaflet_id = street_layout.layers[i_street].id;
+        if ( streets.getLayer(leaflet_id)._direction != street_layout.layers[i_street].direction )
+        {
+            streets.getLayer(leaflet_id)._direction = street_layout.layers[i_street].direction;
+            // console.log("Direction of segment id " + leaflet_id + " changed to " + street_layout.layers[i_street].direction);
+        }
+    }
+
     streets.eachLayer(function(polyline){
         var arrowColor;
         if ( polyline._direction != Direction.DOUBLE && (typeof polyline._polyline2) != "undefined" )
@@ -390,11 +400,10 @@ function loadHostedGeojson(geojsonFilename) {
 }
 
 
-function updateStreetsAndFitness(new_streets, new_fitness)
+function updateStreetsAndFitness(street_layout, fitness)
 {
-    document.getElementById("fitness").innerText = new_fitness;
-    streets = new_streets;
-    updateStreets();
+    document.getElementById("fitness").innerText = fitness;
+    updateStreets(street_layout);
 }
 
 // Load points in geojson file and markers
@@ -423,8 +432,8 @@ displayButton.addEventListener("click", function() {
 
 const geneticButton = document.getElementById("genetic");
 geneticButton.addEventListener("click", function() {
-    streets = searchBestFit(streets, transitStreet, transitExceptions, updateStreetsAndFitness);
-    updateStreets();
+    best_streets_layout = searchBestFit(streets, transitStreet, transitExceptions, updateStreetsAndFitness);
+    updateStreets(best_streets_layout);
     refreshRatRuns();
     displayRatRuns();
 });
