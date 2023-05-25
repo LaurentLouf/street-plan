@@ -62,6 +62,21 @@ function mutateStreetsLayout(streets_layout, number_changes)
     return streets_layout;
 }
 
+function breedStreetsLayout(street_layout_parent_1, street_layout_parent_2)
+{
+    let street_layout_child = street_layout_parent_1;
+
+    for ( var i_street = 0; i_street < street_layout_parent_1.layers.length; i_street++ )
+    {
+        if ( Math.random() > 0.5 )
+        {
+            street_layout_child.layers[i_street].direction = street_layout_parent_2.layers[i_street].direction;
+        }
+    }
+
+    return street_layout_child;
+}
+
 // The current formula for the fitness is :
 //   - Fitness = number of rat runs
 //                  + 0.5 * number of changes from initial plan
