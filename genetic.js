@@ -38,12 +38,18 @@ function mutateStreetsLayout(streets_layout, number_changes)
 
 // The current formula for the fitness is :
 //   - Fitness = number of rat runs
+//                  + 0.5 * number of changes from initial plan
+//                  + 5 * number of streets_layout where traffic is cut
 function fitness(streets_layout, transit_streets, transit_exceptions) {
     let pairs = [];
+    let number_changes = 0;
+    let number_cut_traffic = 0;
+
     streets_layout.eachLayer(function(polyline){
         let direction = polyline['_direction'];
         let start = polyline['_point_start'];
         let end = polyline['_point_end'];
+        let base = polyline['_base'];
 
         if (direction === Direction.BASE) {
             pairs.push([start, end]);
@@ -52,13 +58,21 @@ function fitness(streets_layout, transit_streets, transit_exceptions) {
         } else if (direction === Direction.DOUBLE) {
             pairs.push([start, end]);
             pairs.push([end, start]);
+        } else if (direction === Direction.NONE) {
+            number_cut_traffic++;
         }
+
+        if ( base != direction )
+        {
+            number_changes++;
+        }
+
     });
 
     let graph = buildGraphfromPairs(pairs);
     let ratRuns = getRatRuns(graph, transit_streets, transit_exceptions);
 
-    return ratRuns.length;
+    return ratRuns.length + 0.1 * number_changes + 5 * number_cut_traffic;
 }
 
 function searchBestFit(streets_layout, transit_streets, transit_exceptions, callbackNewBestFitness) {
