@@ -6,20 +6,23 @@
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-pandanic-theme@1.0.0/dist/leaflet-pandanic-theme.min.css"> -->
   </head>
   <body style="width:100%; height:100%;">
-      <div id="map" style="height: 80%; width: 98%;"></div>
+      <div id="map" style="height: 90%; width: 98%;"></div>
       <input type="file" id="fileInput">
-      <div>
-        <p>Option sur les rat runs:</p>
-        <button id="display-rat-runs">Afficher</button>
-        <button id="clear-rat-runs">Effacer</button>
-        <button id="genetic">Résoudre</button>
-      </div>
-      <div>
-        <p>Option algorithme résolution</p>
-        <label for="rat-run-coef">Coefficient rat-run : <input type="number" id="rat-run-coef" min="0" max="10" value="1" step="0.1"></label>
-        <label for="change-coef">Coefficient nombre de changements : <input type="number" id="change-coef" min="0" max="10" value="0.1" step="0.1"></label>
-        <label for="cut-coef">Coefficient rue piétonne : <input type="number" id="cut-coef" min="0" max="10" value="5" step="0.1"></label>
-        <p id="fitness"></p>
+      <div id="options" style="display:flex">
+        <div id="rat-run-options" style="flex-grow: 1;">
+            <p>Option sur les rat runs:</p>
+            <button id="display-rat-runs">Afficher</button>
+            <button id="clear-rat-runs">Effacer</button>
+            <button id="genetic">Résoudre</button>
+        </div>
+
+        <div id="algorithm-options" style="flex-grow: 3;">
+            <p>Option algorithme résolution</p>
+            <label for="rat-run-coef">Coefficient rat-run : <input type="number" id="rat-run-coef" min="0" max="10" value="1" step="0.1"></label>
+            <label for="change-coef">Coefficient nombre de changements : <input type="number" id="change-coef" min="0" max="10" value="0.1" step="0.1"></label>
+            <label for="cut-coef">Coefficient rue piétonne : <input type="number" id="cut-coef" min="0" max="10" value="5" step="0.1"></label>
+            <p id="fitness"></p>
+        </div>
       </div>
       <div id="rat-run-output"></div>
       <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
