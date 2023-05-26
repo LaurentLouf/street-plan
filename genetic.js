@@ -1,4 +1,13 @@
-const LOG_LEVEL_GENETIC = 0;
+const LOG_LEVELS = {
+    NONE:               0x0000,
+    PERFORMANCE:        0x0001,
+    MESSAGE_DEBUG:      0x0010,
+    MESSAGE_INFO:       0x0020,
+    MESSAGE_WARNING:    0x0040,
+    MESSAGE_ERROR:      0x0080,
+};
+
+const LOG_LEVEL_GENETIC = LOG_LEVELS.PERFORMANCE | LOG_LEVELS.MESSAGE_INFO;
 const POPULATION_SIZE = 5;
 const NUMBER_GENERATIONS = 1000;
 
@@ -30,25 +39,25 @@ function mutateStreetsLayout(streets_layout, number_changes)
         // Set direction to 'base'
         if ( type_of_change == 0 )
         {
-            if ( LOG_LEVEL_GENETIC >= 2 ) console.log("Set direction of " + street_index + " to base");
+            if ( LOG_LEVEL_GENETIC & LOG_LEVELS.MESSAGE_DEBUG ) console.log("Set direction of " + street_index + " to base");
             streets_layout.layers[street_index].direction = Direction.BASE;
         }
         // Set direction to 'reverse'
         else if ( type_of_change == 1 )
         {
-            if ( LOG_LEVEL_GENETIC >= 2 ) console.log("Set direction of " + street_index + " to reverse");
+            if ( LOG_LEVEL_GENETIC & LOG_LEVELS.MESSAGE_DEBUG ) console.log("Set direction of " + street_index + " to reverse");
             streets_layout.layers[street_index].direction = Direction.REVERSE;
         }
         // Set direction to 'double'
         else if ( type_of_change == 2 )
         {
-            if ( LOG_LEVEL_GENETIC >= 2 ) console.log("Set direction of " + street_index + " to double");
+            if ( LOG_LEVEL_GENETIC & LOG_LEVELS.MESSAGE_DEBUG ) console.log("Set direction of " + street_index + " to double");
             streets_layout.layers[street_index].direction = Direction.DOUBLE;
         }
         // Set direction to 'none'
         else if ( type_of_change == 3 )
         {
-            if ( LOG_LEVEL_GENETIC >= 2 ) console.log("Set direction of " + street_index + " to none");
+            if ( LOG_LEVEL_GENETIC & LOG_LEVELS.MESSAGE_DEBUG ) console.log("Set direction of " + street_index + " to none");
             streets_layout.layers[street_index].direction = Direction.NONE;
         }
     }
@@ -114,7 +123,8 @@ function searchBestFit(streets_layout, transit_streets, transit_exceptions, coef
     let simplified_layout = simplifyStreetLayoutStructure(streets_layout);
     let best_individual = {"layout": simplified_layout, "fitness": 0};
     best_individual.fitness = fitness(best_individual.layout, transit_streets, transit_exceptions, coeffs);
-    console.log("Fitness : " + best_individual.fitness);
+    if ( LOG_LEVEL_GENETIC & LOG_LEVELS.MESSAGE_INFO)
+        console.log("Fitness : " + best_individual.fitness);
 
     // Iterate
     let population = Array(POPULATION_SIZE).fill({"layout": simplified_layout, "fitness": 0});
@@ -142,6 +152,9 @@ function searchBestFit(streets_layout, transit_streets, transit_exceptions, coef
         }
 
         // Get fitness for all the population
+        if (LOG_LEVEL_GENETIC & LOG_LEVELS.PERFORMANCE )
+            var begin_fitness_computation = Date.now();
+
         for ( var i_individual = 0; i_individual < population.length ; i_individual++)
         {
             if ( population[i_individual].fitness === 0 )
@@ -149,12 +162,16 @@ function searchBestFit(streets_layout, transit_streets, transit_exceptions, coef
                 population[i_individual].fitness = fitness(population[i_individual].layout, transit_streets, transit_exceptions, coeffs);
             }
         }
+        if (LOG_LEVEL_GENETIC & LOG_LEVELS.PERFORMANCE )
+            console.log("Fitness computation time for population size " + population.length + " = " + (Date.now() - begin_fitness_computation) + "ms");
+
         population.sort((individual_1, individual_2) => individual_1.fitness > individual_2.fitness);
 
         // See if the best fitness has improved
         if ( population[0].fitness < best_individual.fitness )
         {
-            console.log("Fitness : " + population[0].fitness + " at iteration " + iteration);
+            if ( LOG_LEVEL_GENETIC & LOG_LEVELS.MESSAGE_INFO)
+                console.log("Fitness : " + population[0].fitness + " at iteration " + iteration);
             best_individual = population[0];
 
             if ( typeof callbackNewBestFitness == "function" ){
