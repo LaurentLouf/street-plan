@@ -126,6 +126,7 @@ function searchBestFit(streets_layout, transit_streets, transit_exceptions, coef
         for ( var i_individual = 0; i_individual < POPULATION_SIZE ; i_individual++)
         {
             mutated_population[i_individual].layout = mutateStreetsLayout(mutated_population[i_individual].layout, Math.floor(Math.random() * population[0].layout.layers.length));
+            mutated_population.fitness = 0;
         }
         population = population.concat(mutated_population);
 
@@ -143,7 +144,10 @@ function searchBestFit(streets_layout, transit_streets, transit_exceptions, coef
         // Get fitness for all the population
         for ( var i_individual = 0; i_individual < population.length ; i_individual++)
         {
-            population[i_individual].fitness = fitness(population[i_individual].layout, transit_streets, transit_exceptions, coeffs);
+            if ( population[i_individual].fitness === 0 )
+            {
+                population[i_individual].fitness = fitness(population[i_individual].layout, transit_streets, transit_exceptions, coeffs);
+            }
         }
         population.sort((individual_1, individual_2) => individual_1.fitness > individual_2.fitness);
 
