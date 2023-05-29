@@ -1,7 +1,28 @@
-function fetchOSMData(bounds) {
-    fetch("https://overpass-api.de/api/interpreter?data=[out:json][timeout:25][maxsize:10485760];(way[\"highway\"](" + bounds[0].lat + ", " + bounds[0].lng + ", " + bounds[1].lat + ", " + bounds[1].lng + "););out body;>;out skel qt;")
+function getOverpassBounds(bounds) {
+    return "(" + bounds[0]['lat'] + "," + bounds[0]['lng'] + "," + bounds[1]['lat'] + "," + bounds[1]['lng'] + ")" ;
+}
+
+async function fetchOSMData(bounds) {
+    // Possible values seen used : secondary, primary, tertiary, residential, pedestrian, unclassified, living_street, service, footway, cycleway, steps, tertiary_link, elevator, primary_link, construction, path, corridor
+    let property_filters = [
+        '"highway"="primary"',
+        '"highway"="secondary"',
+        '"highway"="tertiary"',
+        '"highway"="residential"',
+        '"highway"="living_street"',
+    ];
+
+    let osm_filters = '';
+    for (osm_filter of property_filters) {
+        osm_filters = osm_filters + "way" + "[" + osm_filter + "]"
+        osm_filters = osm_filters + getOverpassBounds(bounds) + ";"
+    }
+
+    let response = await fetch("https://overpass-api.de/api/interpreter?data=[out:json][timeout:25][maxsize:10485760];(" + osm_filters + ");out body;>;out skel qt;")
         .then((response) => response.json())
         .then((json) => processOSMData(json));
+
+    return response;
 }
 
 function processOSMData(osm_map_data_highways) {
