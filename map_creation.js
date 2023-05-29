@@ -27,9 +27,9 @@ async function fetchOSMData(bounds) {
 
 function processOSMData(osm_map_data_highways) {
     let elements = osm_map_data_highways.elements;
-    let ways = elements.filter(element => element.type == "way");
+    let ways = elements.filter(element => element.type == "way" && (typeof element.tags.area == "undefined" || element.tags.area == "no") );
     let nodes = elements.filter(element => element.type == "node");
-    let kept_nodes = [];
+    let nodes_intersection = [];
     // Search for each way
     for ( var i_way = 0 ; i_way < ways.length ; i_way++)
     {
@@ -41,11 +41,17 @@ function processOSMData(osm_map_data_highways) {
         {
             // If the node can be found in another way, meaning an intersection
             if ( nodes_other_ways.indexOf(ways[i_way].nodes[i_node]) != -1 )
-                kept_nodes.push(ways[i_way].nodes[i_node]);
+            {
+                let corresponding_node = nodes.find(node => node.id == ways[i_way].nodes[i_node]);
+                nodes_intersection.push(corresponding_node);
+            } else
+            {
+                delete ways[i_way].nodes[i_node];
+            }
         }
     }
 
-    console.log(kept_nodes);
+    return nodes_intersection;
 }
 
 // fetchOSMData([{lat: 48.87270360902764, lng:2.3259687423706055}, {lat:48.88495257890439, lng: 2.355194091796875}]);
