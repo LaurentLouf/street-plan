@@ -201,6 +201,11 @@ function reverseArrow(ev) {
 
     refreshRatRuns();
     displayRatRuns();
+
+    let simplified_layout = simplifyStreetLayoutStructure(streets);
+    let coeffs = {"rat_run": Number(document.getElementById("rat-run-coef").value), "change": Number(document.getElementById("change-coef").value), "cut": Number(document.getElementById("cut-coef").value)};
+    let fitness = computeFitness(simplified_layout, transitStreet, transitExceptions, coeffs);
+    document.getElementById("fitness").innerText = fitness;
 }
 
 function getTransitSets(transitGraph) {
