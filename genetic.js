@@ -80,14 +80,13 @@ function breedStreetsLayout(street_layout_parent_1, street_layout_parent_2)
     return street_layout_child;
 }
 
-// The current formula for the fitness is :
-//   - Fitness = number of rat runs
-//                  + 0.5 * number of changes from initial plan
-//                  + 5 * number of streets_layout where traffic is cut
 function fitness(streets_layout, transit_streets, transit_exceptions, coeffs) {
     let pairs = [];
     let number_changes = 0;
     let number_cut_traffic = 0;
+    let possible_dead_ends = new Set();
+    let number_dead_ends = 0;
+    let transit_nodes = transit_streets.flat(2);
 
     for ( var i_street = 0; i_street < streets_layout.layers.length; i_street++ )
     {
@@ -98,8 +97,10 @@ function fitness(streets_layout, transit_streets, transit_exceptions, coeffs) {
 
         if (direction === Direction.BASE) {
             pairs.push([start, end]);
+            possible_dead_ends.add(end);
         } else if (direction === Direction.REVERSE) {
             pairs.push([end, start]);
+            possible_dead_ends.add(start);
         } else if (direction === Direction.DOUBLE) {
             pairs.push([start, end]);
             pairs.push([end, start]);
@@ -113,10 +114,26 @@ function fitness(streets_layout, transit_streets, transit_exceptions, coeffs) {
         }
     }
 
+    let log_dead_ends = "Dead ends : ";
+    for ( possible_dead_end of possible_dead_ends)
+    {
+        if ( transit_nodes.indexOf(possible_dead_end) == -1 && pairs.find(pair => pair[0] == possible_dead_end) == undefined )
+        {
+            number_dead_ends++;
+            log_dead_ends += possible_dead_end + " ";
+        }
+    }
+
     let graph = buildGraphfromPairs(pairs);
     let ratRuns = getRatRuns(graph, transit_streets, transit_exceptions);
 
-    return ratRuns.length * coeffs.rat_run + number_changes * coeffs.change + number_cut_traffic * coeffs.cut;
+    if ( LOG_LEVEL_GENETIC & LOG_LEVELS.MESSAGE_INFO )
+        console.log("Number dead ends " + number_dead_ends + ", " + log_dead_ends);
+
+    return ratRuns.length * coeffs.rat_run
+        + number_changes * coeffs.change
+        + number_cut_traffic * coeffs.cut
+        + number_dead_ends * 100 ;
 }
 
 function searchBestFit(streets_layout, transit_streets, transit_exceptions, coeffs, callbackNewBestFitness) {
