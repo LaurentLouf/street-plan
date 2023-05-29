@@ -80,7 +80,7 @@ function breedStreetsLayout(street_layout_parent_1, street_layout_parent_2)
     return street_layout_child;
 }
 
-function fitness(streets_layout, transit_streets, transit_exceptions, coeffs) {
+function computeFitness(streets_layout, transit_streets, transit_exceptions, coeffs) {
     let pairs = [];
     let number_changes = 0;
     let number_cut_traffic = 0;
@@ -139,7 +139,7 @@ function fitness(streets_layout, transit_streets, transit_exceptions, coeffs) {
 function searchBestFit(streets_layout, transit_streets, transit_exceptions, coeffs, callbackNewBestFitness) {
     let simplified_layout = simplifyStreetLayoutStructure(streets_layout);
     let best_individual = {"layout": simplified_layout, "fitness": 0};
-    best_individual.fitness = fitness(best_individual.layout, transit_streets, transit_exceptions, coeffs);
+    best_individual.fitness = computeFitness(best_individual.layout, transit_streets, transit_exceptions, coeffs);
     if ( LOG_LEVEL_GENETIC & LOG_LEVELS.MESSAGE_INFO)
         console.log("Fitness : " + best_individual.fitness);
 
@@ -176,7 +176,7 @@ function searchBestFit(streets_layout, transit_streets, transit_exceptions, coef
         {
             if ( population[i_individual].fitness === 0 )
             {
-                population[i_individual].fitness = fitness(population[i_individual].layout, transit_streets, transit_exceptions, coeffs);
+                population[i_individual].fitness = computeFitness(population[i_individual].layout, transit_streets, transit_exceptions, coeffs);
             }
         }
         if (LOG_LEVEL_GENETIC & LOG_LEVELS.PERFORMANCE )
