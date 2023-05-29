@@ -363,3 +363,16 @@ displayButton.addEventListener("click", function() {
     refreshRatRuns();
     displayRatRuns();
 });
+
+const mapCreationButton = document.getElementById("map-creation");
+mapCreationButton.addEventListener("click", function() {
+    let bounds = map.getBounds();
+    fetchOSMData([{lat: bounds.getSouth(), lng: bounds.getWest()}, {lat: bounds.getNorth(), lng: bounds.getEast()}])
+        .then(nodes => {
+            console.log(nodes);
+            nodes.forEach(node =>
+                {
+                    L.marker([node.lat, node.lon]).addTo(map);
+                })
+        });
+});

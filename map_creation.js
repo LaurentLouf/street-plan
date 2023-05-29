@@ -53,6 +53,3 @@ function processOSMData(osm_map_data_highways) {
 
     return nodes_intersection;
 }
-
-// fetchOSMData([{lat: 48.87270360902764, lng:2.3259687423706055}, {lat:48.88495257890439, lng: 2.355194091796875}]);
-fetchOSMData([{lat: 48.88163485778777, lng:2.331321090459823}, {lat:48.88269845742566, lng: 2.3326487839221954}])
