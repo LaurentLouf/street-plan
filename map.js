@@ -27,6 +27,7 @@ const arrowSettings = {
 };
 
 const LOG_LEVEL = 0;
+const DEBUG = 1;
 
 let dict = {};
 let streets = L.featureGroup();
@@ -41,6 +42,28 @@ var map = L.map('map', { doubleClickZoom: false }).setView([48.89, 2.345], 15); 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
 }).addTo(map);
+
+L.TextIcon = L.Icon.extend({
+	options: {
+        text: '',
+        shadowUrl: null,
+        iconSize: new L.Point(30, 30),
+        iconAnchor: new L.Point(14, 30),
+        className: 'leaflet-text-icon'
+	},
+
+	createIcon: function () {
+		var div = document.createElement('div');
+		div.innerHTML = this.options['text'] || '';
+		this._setIconStyles(div, 'icon');
+		return div;
+	},
+
+	//you could change this to add a shadow like in the normal marker if you really wanted
+	createShadow: function () {
+		return null;
+	}
+});
 
 // Verify there is no duplicate  a->b b->a neighbor relationship
 function checkNoSelfReferencingNeighbors(points) {
@@ -344,6 +367,10 @@ function drawStreets(pointDictionary) {
     for (let key in pointDictionary) {
         p = pointDictionary[key];
         way_start = L.latLng(p.lat, p.long);
+
+        if ( DEBUG)
+            L.marker(way_start, { icon: new L.TextIcon({text: Number(key)})}).addTo(map);
+
         if (Object.keys(p.neighbors).length > 0) {
             for (let n in p.neighbors) {
                 if (n>0) {
