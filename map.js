@@ -222,13 +222,7 @@ function reverseArrow(ev) {
         polyline.setLatLngs(polyline.getLatLngs());
     }
 
-    refreshRatRuns();
-    displayRatRuns();
-
-    let simplified_layout = simplifyStreetLayoutStructure(streets);
-    let coeffs = {"rat_run": Number(document.getElementById("rat-run-coef").value), "change": Number(document.getElementById("change-coef").value), "cut": Number(document.getElementById("cut-coef").value)};
-    let fitness = computeFitness(simplified_layout, transitStreet, transitExceptions, coeffs);
-    document.getElementById("fitness").innerText = fitness;
+    refreshLayoutAnalysis();
 }
 
 function getTransitSets(transitGraph) {
@@ -448,8 +442,7 @@ function drawStreets(pointDictionary) {
     }
     streets.addTo(map);
 
-    refreshRatRuns();
-    displayRatRuns();
+    refreshLayoutAnalysis();
 }
 
 function processGeojson(geojson) {
@@ -506,8 +499,7 @@ clearButton.addEventListener("click", function() {
 
 const displayButton = document.getElementById("display-rat-runs");
 displayButton.addEventListener("click", function() {
-    refreshRatRuns();
-    displayRatRuns();
+    refreshLayoutAnalysis();
 });
 
 const geneticButton = document.getElementById("genetic");
@@ -515,6 +507,5 @@ geneticButton.addEventListener("click", function() {
     let coeffs = {"rat_run": Number(document.getElementById("rat-run-coef").value), "change": Number(document.getElementById("change-coef").value), "cut": Number(document.getElementById("cut-coef").value)};
     best_streets_layout = searchBestFit(streets, coeffs, updateStreetsAndFitness);
     updateStreets(best_streets_layout);
-    refreshRatRuns();
-    displayRatRuns();
+    refreshLayoutAnalysis();
 });
