@@ -32,6 +32,7 @@ const DEBUG = 1;
 let dict = {};
 let streets = L.featureGroup();
 let streets_rr = L.featureGroup();
+let marker_dead_ends = L.featureGroup();
 let transitStreet = [];
 let transitExceptions = {};
 
@@ -380,6 +381,7 @@ function refreshLayoutAnalysis(){
     }
     markRatRuns(streets, layoutAnalysis.ratRuns);
     displayRatRuns();
+    displayDeadEnds(layoutAnalysis.deadEnds);
 }
 
 function displayRatRuns() {
@@ -391,6 +393,28 @@ function displayRatRuns() {
     });
     streets_rr.addTo(map);
     streets_rr.bringToBack();
+}
+
+function displayDeadEnds(deadEnds) {
+    marker_dead_ends.clearLayers();
+    if ( deadEnds.size == 0 )
+        return;
+
+    let deadEndsArray = Array.from(deadEnds);
+    streets.eachLayer(function(layer) {
+        if ( deadEndsArray.indexOf(layer._point_start) != -1 )
+        {
+            marker_dead_ends.addLayer(
+                L.marker(layer._latlngs[0],
+                    { icon: new L.TextIcon({text: "⚠", size: "big", color: "red"})}).addTo(map) );
+        }
+        else if ( deadEndsArray.indexOf(layer._point_end) != -1 )
+        {
+            marker_dead_ends.addLayer(
+                L.marker(layer._latlngs[1],
+                    { icon: new L.TextIcon({text: "⚠", size: "big", color: "red"})}).addTo(map) );
+        }
+    });
 }
 
 function displayRatRuns() {
@@ -481,6 +505,7 @@ function updateStreetsAndFitness(street_layout, fitness)
 {
     document.getElementById("fitness").innerText = fitness;
     updateStreets(street_layout);
+
 }
 
 // Load points in geojson file and markers
