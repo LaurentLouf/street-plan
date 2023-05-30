@@ -49,12 +49,16 @@ L.TextIcon = L.Icon.extend({
         shadowUrl: null,
         iconSize: new L.Point(30, 30),
         iconAnchor: new L.Point(14, 30),
-        className: 'leaflet-text-icon'
+        className: 'leaflet-text-icon',
+        size: '',
+        color: 'black'
 	},
 
 	createIcon: function () {
 		var div = document.createElement('div');
 		div.innerHTML = this.options['text'] || '';
+		div.style.fontSize = (this.options["size"] == 'big' ? '30px' : '15px');
+		div.style.color = this.options["color"];
 		this._setIconStyles(div, 'icon');
 		return div;
 	},
