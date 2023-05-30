@@ -303,24 +303,60 @@ function buildTransitExceptions(points) {
     return transitExceptions;
 }
 
-function buildGraph(polylineLayerGroup) {
-    let pairs = [];
-    polylineLayerGroup.eachLayer(function(polyline){
+function analyzeLayout(street_layout) {
+    let layout = street_layout;
+    // Simplify the layout for memory consumption : discard non-needed leaflet parameters of the structure
+    if ( typeof layout._leaflet_id != "undefined" )
+    {
+        layout = simplifyStreetLayoutStructure(street_layout);
+    }
 
-        let direction = polyline['_direction'];
-        let start = polyline['_point_start'];
-        let end = polyline['_point_end'];
+    let pairs = [];
+    let number_changes = 0;
+    let number_cut_traffic = 0;
+    let possible_dead_ends = new Set();
+    let transit_nodes = transitStreet.flat(2);
+
+    // For every street, build the pairs (start --> end) of possible movements
+    // During the process, register the numbers of change made, as well as
+    // possible dead ends (note that is only the end of a movement) to minize the
+    // number of graph walkthroughs
+    for ( var i_street = 0; i_street < layout.layers.length; i_street++ )
+    {
+        let direction = layout.layers[i_street].direction;
+        let start = layout.layers[i_street].start;
+        let end = layout.layers[i_street].end;
+        let base = layout.layers[i_street].base;
 
         if (direction === Direction.BASE) {
             pairs.push([start, end]);
+            possible_dead_ends.add(end);
         } else if (direction === Direction.REVERSE) {
             pairs.push([end, start]);
+            possible_dead_ends.add(start);
         } else if (direction === Direction.DOUBLE) {
             pairs.push([start, end]);
             pairs.push([end, start]);
+        } else if (direction === Direction.NONE) {
+            number_cut_traffic++;
         }
+
+        if ( base != direction )
+        {
+            number_changes++;
+        }
+    }
+
+    // Confirm the possible dead ends, remove the transit nodes, and nodes being the start of a pair
+    possible_dead_ends.forEach((dead_end_node) => {
+        if ( transit_nodes.indexOf(dead_end_node) != -1 || pairs.find(pair => pair[0] == dead_end_node) != undefined )
+            possible_dead_ends.delete(dead_end_node);
     });
-    return buildGraphfromPairs(pairs);
+
+    let graph = buildGraphfromPairs(pairs);
+    let ratRuns = getRatRuns(graph, transitStreet, transitExceptions);
+
+    return {"graph": graph, "ratRuns": ratRuns, "deadEnds" : possible_dead_ends, "numberChanges": number_changes, "numberCut": number_cut_traffic};
 }
 
 function markRatRuns(streets, ratRuns) {
@@ -337,14 +373,26 @@ function markRatRuns(streets, ratRuns) {
     });
 }
 
-function refreshRatRuns(){
-    let graph = buildGraph(streets);
-    let ratRuns = getRatRuns(graph, transitStreet, transitExceptions);
-    if (ratRuns.length > 0 && LOG_LEVEL >= 1) {
-        console.log(`Found ${ratRuns.length} rat runs`);
-        ratRuns.forEach(r => console.log('- ', r));
+function refreshLayoutAnalysis(){
+    let layoutAnalysis = analyzeLayout(streets);
+
+    if (layoutAnalysis.ratRuns.length > 0 && LOG_LEVEL >= 1) {
+        console.log(`Found ${layoutAnalysis.ratRuns.length} rat runs`);
+        layoutAnalysis.ratRuns.forEach(r => console.log('- ', r));
     }
-    markRatRuns(streets, ratRuns);
+    markRatRuns(streets, layoutAnalysis.ratRuns);
+    displayRatRuns();
+}
+
+function displayRatRuns() {
+    streets_rr.clearLayers();
+    streets.eachLayer(function(layer) {
+        if (layer['_rat_run']) {
+            streets_rr.addLayer(L.polyline(layer.getLatLngs(), {color: 'red', weight: 10, interactive: false }));
+        }
+    });
+    streets_rr.addTo(map);
+    streets_rr.bringToBack();
 }
 
 function displayRatRuns() {
@@ -465,7 +513,7 @@ displayButton.addEventListener("click", function() {
 const geneticButton = document.getElementById("genetic");
 geneticButton.addEventListener("click", function() {
     let coeffs = {"rat_run": Number(document.getElementById("rat-run-coef").value), "change": Number(document.getElementById("change-coef").value), "cut": Number(document.getElementById("cut-coef").value)};
-    best_streets_layout = searchBestFit(streets, transitStreet, transitExceptions, coeffs, updateStreetsAndFitness);
+    best_streets_layout = searchBestFit(streets, coeffs, updateStreetsAndFitness);
     updateStreets(best_streets_layout);
     refreshRatRuns();
     displayRatRuns();

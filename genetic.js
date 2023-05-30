@@ -80,62 +80,22 @@ function breedStreetsLayout(street_layout_parent_1, street_layout_parent_2)
     return street_layout_child;
 }
 
-function computeFitness(streets_layout, transit_streets, transit_exceptions, coeffs) {
-    let pairs = [];
-    let number_changes = 0;
-    let number_cut_traffic = 0;
-    let possible_dead_ends = new Set();
-    let number_dead_ends = 0;
-    let transit_nodes = transit_streets.flat(2);
-
-    for ( var i_street = 0; i_street < streets_layout.layers.length; i_street++ )
-    {
-        let direction = streets_layout.layers[i_street].direction;
-        let start = streets_layout.layers[i_street].start;
-        let end = streets_layout.layers[i_street].end;
-        let base = streets_layout.layers[i_street].base;
-
-        if (direction === Direction.BASE) {
-            pairs.push([start, end]);
-            possible_dead_ends.add(end);
-        } else if (direction === Direction.REVERSE) {
-            pairs.push([end, start]);
-            possible_dead_ends.add(start);
-        } else if (direction === Direction.DOUBLE) {
-            pairs.push([start, end]);
-            pairs.push([end, start]);
-        } else if (direction === Direction.NONE) {
-            number_cut_traffic++;
-        }
-
-        if ( base != direction )
-        {
-            number_changes++;
-        }
-    }
-
-    // Confirm the possible dead ends, remove the transit nodes, and nodes being the start of a pair
-    possible_dead_ends.forEach((dead_end_node) => {
-        if ( transit_nodes.indexOf(dead_end_node) != -1 || pairs.find(pair => pair[0] == dead_end_node) != undefined )
-            possible_dead_ends.delete(dead_end_node);
-    });
-
-    let graph = buildGraphfromPairs(pairs);
-    let ratRuns = getRatRuns(graph, transit_streets, transit_exceptions);
+function computeFitness(streets_layout, coeffs) {
+    let layoutAnalysis = analyzeLayout(streets_layout);
 
     if ( LOG_LEVEL_GENETIC & LOG_LEVELS.MESSAGE_INFO )
-        console.log("Number dead ends " + possible_dead_ends.size + ", dead ends : " + Array.from(possible_dead_ends).join(", ") );
+        console.log("Number dead ends " + layoutAnalysis.deadEnds.size + ", dead ends : " + Array.from(layoutAnalysis.deadEnds).join(", ") );
 
-    return ratRuns.length * coeffs.rat_run
-        + number_changes * coeffs.change
-        + number_cut_traffic * coeffs.cut
-        + possible_dead_ends.size * 100 ;
+    return layoutAnalysis.ratRuns.length * coeffs.rat_run
+        + layoutAnalysis.numberChanges * coeffs.change
+        + layoutAnalysis.numberCut * coeffs.cut
+        + layoutAnalysis.deadEnds.size * 100 ;
 }
 
-function searchBestFit(streets_layout, transit_streets, transit_exceptions, coeffs, callbackNewBestFitness) {
+function searchBestFit(streets_layout, coeffs, callbackNewBestFitness) {
     let simplified_layout = simplifyStreetLayoutStructure(streets_layout);
     let best_individual = {"layout": simplified_layout, "fitness": 0};
-    best_individual.fitness = computeFitness(best_individual.layout, transit_streets, transit_exceptions, coeffs);
+    best_individual.fitness = computeFitness(best_individual.layout, tcoeffs);
     if ( LOG_LEVEL_GENETIC & LOG_LEVELS.MESSAGE_INFO)
         console.log("Fitness : " + best_individual.fitness);
 
@@ -172,7 +132,7 @@ function searchBestFit(streets_layout, transit_streets, transit_exceptions, coef
         {
             if ( population[i_individual].fitness === 0 )
             {
-                population[i_individual].fitness = computeFitness(population[i_individual].layout, transit_streets, transit_exceptions, coeffs);
+                population[i_individual].fitness = computeFitness(population[i_individual].layout, coeffs);
             }
         }
         if (LOG_LEVEL_GENETIC & LOG_LEVELS.PERFORMANCE )
