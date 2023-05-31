@@ -45,7 +45,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 L.TextIcon = L.Icon.extend({
-	options: {
+    options: {
         text: '',
         shadowUrl: null,
         iconSize: new L.Point(30, 30),
@@ -53,21 +53,21 @@ L.TextIcon = L.Icon.extend({
         className: 'leaflet-text-icon',
         size: '',
         color: 'black'
-	},
+    },
 
-	createIcon: function () {
-		var div = document.createElement('div');
-		div.innerHTML = this.options['text'] || '';
-		div.style.fontSize = (this.options["size"] == 'big' ? '30px' : '15px');
-		div.style.color = this.options["color"];
-		this._setIconStyles(div, 'icon');
-		return div;
-	},
+    createIcon: function () {
+        var div = document.createElement('div');
+        div.innerHTML = this.options['text'] || '';
+        div.style.fontSize = (this.options["size"] == 'big' ? '30px' : '15px');
+        div.style.color = this.options["color"];
+        this._setIconStyles(div, 'icon');
+        return div;
+    },
 
-	//you could change this to add a shadow like in the normal marker if you really wanted
-	createShadow: function () {
-		return null;
-	}
+    //you could change this to add a shadow like in the normal marker if you really wanted
+    createShadow: function () {
+        return null;
+    }
 });
 
 // Verify there is no duplicate  a->b b->a neighbor relationship
