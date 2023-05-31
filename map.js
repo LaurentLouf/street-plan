@@ -353,6 +353,30 @@ fileInput.addEventListener('change', function() {
     reader.readAsText(file);
 });
 
+
+const exportButton = document.getElementById("export-map-state");
+exportButton.addEventListener("click", function() {
+    // Stringify the streets and remove cyclic object value
+    var seen = [];
+    let json_street = JSON.stringify(streets, function(key, val) {
+        if (val != null && typeof val == "object") {
+             if (seen.indexOf(val) >= 0) {
+                 return;
+             }
+             seen.push(val);
+         }
+         return val;
+     });
+
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(json_street));
+    element.setAttribute('download', "streets.leaflet");
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+});
+
 const clearButton = document.getElementById("clear-rat-runs");
 clearButton.addEventListener("click", function() {
     streets_rr.clearLayers();
