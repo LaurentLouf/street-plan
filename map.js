@@ -105,35 +105,35 @@ function reverseArrow(ev) {
     // Change the color of the polyline
     // BASE > REVERSE > DOUBLE > NONE > BASE > ...
     var arrowColor;
-    if (polyline._direction === Direction.BASE) {
+    if (polyline.feature.properties._direction === Direction.BASE) {
         // From BASE to REVERSE
-        polyline._direction = Direction.REVERSE;
+        polyline.feature.properties._direction = Direction.REVERSE;
         arrowColor = "green";
         polyline.setStyle({color : arrowColor});
         polyline.setLatLngs(polyline.getLatLngs().reverse()); // also applies the style changes to the arrowhead
 
-    } else if (polyline._direction === Direction.REVERSE) {
+    } else if (polyline.feature.properties._direction === Direction.REVERSE) {
         // From REVERSE to DOUBLE
-        polyline._direction = Direction.DOUBLE;
-        arrowColor = (polyline._base === Direction.DOUBLE) ? "blue" : "green";
+        polyline.feature.properties._direction = Direction.DOUBLE;
+        arrowColor = (polyline.feature.properties._base === Direction.DOUBLE) ? "blue" : "green";
         polyline.setStyle({color : arrowColor});
         polyline.setLatLngs(polyline.getLatLngs().reverse()); // reset
 
         // Set double-arrow
         addDoubleArrow(polyline, arrowColor);
 
-    } else if (polyline._direction === Direction.DOUBLE) {
+    } else if (polyline.feature.properties._direction === Direction.DOUBLE) {
         // From DOUBLE to NONE
-        polyline._direction = Direction.NONE;
-        arrowColor = (polyline._base === Direction.NONE) ? "blue" : "green";
+        polyline.feature.properties._direction = Direction.NONE ;
+        arrowColor = (polyline.feature.properties._base === Direction.NONE) ? "blue" : "green";
         polyline.getArrowheads().remove();
         polyline.setStyle({color : arrowColor, dashArray: Constant.MODAL_FILTER_DASH });
         polyline._polyline2.remove();
 
     } else {
         // From NONE to BASE
-        polyline._direction = Direction.BASE;
-        arrowColor = (polyline._base === Direction.BASE) ? "blue" : "green";
+        polyline.feature.properties._direction = Direction.BASE ;
+        arrowColor = (polyline.feature.properties._base === Direction.BASE) ? "blue" : "green";
         polyline.getArrowheads().addTo(map);
         polyline.setStyle({color : arrowColor, dashArray: ''});
         polyline.setLatLngs(polyline.getLatLngs());
@@ -219,9 +219,9 @@ function buildGraph(polylineLayerGroup) {
     let pairs = [];
     polylineLayerGroup.eachLayer(function(polyline){
 
-        let direction = polyline['_direction'];
-        let start = polyline['_point_start'];
-        let end = polyline['_point_end'];
+        let direction = polyline.feature.properties._direction;
+        let start = polyline.feature.properties._point_start;
+        let end = polyline.feature.properties._point_end;
 
         if (direction === Direction.BASE) {
             pairs.push([start, end]);
@@ -243,8 +243,8 @@ function markRatRuns(streets, ratRuns) {
         }
     }
     streets.eachLayer(function(polyline) {
-        let start = polyline['_point_start'];
-        let end = polyline['_point_end'];
+        let start = polyline.feature.properties._point_start;
+        let end = polyline.feature.properties._point_end;
         polyline._rat_run = ratRunPairs.has(JSON.stringify([start,end])) || ratRunPairs.has(JSON.stringify([end,start]));
     });
 }
@@ -288,11 +288,15 @@ function drawStreets(pointDictionary) {
                     dashStyle = (direction === Direction.NONE) ? Constant.MODAL_FILTER_DASH : "";
 
                     var polyline = L.polyline([way_start, way_end], {color: 'blue', dashArray: dashStyle});
-                    polyline['_rat_run'] = p.neighbors_rr && p.neighbors_rr.length > 0 && p.neighbors_rr.includes(n);
-                    polyline['_direction'] = direction;
-                    polyline['_base'] = direction;
-                    polyline['_point_start'] = Number(key);
-                    polyline['_point_end'] = Number(n);
+                    polyline.feature = {};
+                    polyline.feature.type = "Feature";
+                    polyline.feature.properties = {};
+                    polyline.feature.properties['_rat_run'] = p.neighbors_rr && p.neighbors_rr.length > 0 && p.neighbors_rr.includes(n);
+                    polyline.feature.properties['_direction'] = direction;
+                    polyline.feature.properties['_base'] = direction;
+                    polyline.feature.properties['_point_start'] = Number(key);
+                    polyline.feature.properties['_point_end'] = Number(n);
+
                     polyline.on('click', reverseArrow);
                     streets.addLayer(polyline);
 
