@@ -44,6 +44,13 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
 }).addTo(map);
 
+const textIconPosition = {
+    TOP_CENTER: 0,
+    BOTTOM_CENTER: 1,
+    LEFT_CENTER: 2,
+    RIGHT_CENTER: 3
+};
+
 L.TextIcon = L.Icon.extend({
     options: {
         text: '',
@@ -52,7 +59,8 @@ L.TextIcon = L.Icon.extend({
         iconAnchor: new L.Point(14, 30),
         className: 'leaflet-text-icon',
         size: '',
-        color: 'black'
+        color: 'black',
+        position: textIconPosition.TOP_CENTER
     },
 
     createIcon: function () {
@@ -61,6 +69,22 @@ L.TextIcon = L.Icon.extend({
         div.style.fontSize = (this.options["size"] == 'big' ? '30px' : '15px');
         div.style.color = this.options["color"];
         this._setIconStyles(div, 'icon');
+        if ( this.options["color"] == textIconPosition.TOP_CENTER){
+            this.options.iconAnchor[0] = 15;
+            this.options.iconAnchor[1] = 30;
+        } else if ( this.options["color"] == textIconPosition.BOTTOM_CENTER){
+            this.options.iconAnchor[0] = 15;
+            this.options.iconAnchor[1] = 0;
+        } else if ( this.options["color"] == textIconPosition.BOTTOM_CENTER){
+            this.options.iconAnchor[0] = 15;
+            this.options.iconAnchor[1] = 0;
+        } else if ( this.options["color"] == textIconPosition.LEFT_CENTER){
+            this.options.iconAnchor[0] = 0;
+            this.options.iconAnchor[1] = 15;
+        } else if ( this.options["color"] == textIconPosition.RIGHT_CENTER){
+            this.options.iconAnchor[0] = 30;
+            this.options.iconAnchor[1] = 15;
+        }
         return div;
     },
 
@@ -402,17 +426,14 @@ function displayDeadEnds(deadEnds) {
 
     let deadEndsArray = Array.from(deadEnds);
     streets.eachLayer(function(layer) {
+        let iconDanger = new L.TextIcon({text: "⚠", size: "big", color: "red", position: textIconPosition.BOTTOM_CENTER});
         if ( deadEndsArray.indexOf(layer._point_start) != -1 )
         {
-            marker_dead_ends.addLayer(
-                L.marker(layer._latlngs[0],
-                    { icon: new L.TextIcon({text: "⚠", size: "big", color: "red"})}).addTo(map) );
+            marker_dead_ends.addLayer( L.marker(layer._latlngs[0], { icon: iconDanger}).addTo(map) );
         }
         else if ( deadEndsArray.indexOf(layer._point_end) != -1 )
         {
-            marker_dead_ends.addLayer(
-                L.marker(layer._latlngs[1],
-                    { icon: new L.TextIcon({text: "⚠", size: "big", color: "red"})}).addTo(map) );
+            marker_dead_ends.addLayer( L.marker(layer._latlngs[1], { icon: iconDanger}).addTo(map) );
         }
     });
 }
