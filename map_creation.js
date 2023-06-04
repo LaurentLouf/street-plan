@@ -29,27 +29,42 @@ function processOSMData(osm_map_data_highways) {
     let elements = osm_map_data_highways.elements;
     let ways = elements.filter(element => element.type == "way" && (typeof element.tags.area == "undefined" || element.tags.area == "no") );
     let nodes = elements.filter(element => element.type == "node");
-    let nodes_intersection = [];
-    // Search for each way
+    let ways_split_at_intersections = [] ;
+
+    // For each way
     for ( var i_way = 0 ; i_way < ways.length ; i_way++)
     {
         let other_ways = ways.filter(way => way.id != ways[i_way].id);
         let nodes_other_ways = other_ways.map(way => way.nodes).flat();
+        let i_node_start = 0;
+
+        // Associate with the nodes their coordinates
+        ways[i_way].nodes = ways[i_way].nodes.map(node_way => {
+            return nodes.filter(node => {
+                return node.id == node_way;
+            })[0];
+        });
 
         // For each of its nodes
         for ( var i_node = 0; i_node < ways[i_way].nodes.length; i_node++ )
         {
             // If the node can be found in another way, meaning an intersection
-            if ( nodes_other_ways.indexOf(ways[i_way].nodes[i_node]) != -1 )
+            if ( nodes_other_ways.indexOf(ways[i_way].nodes[i_node].id) != -1 )
             {
-                let corresponding_node = nodes.find(node => node.id == ways[i_way].nodes[i_node]);
-                nodes_intersection.push(corresponding_node);
-            } else
-            {
-                delete ways[i_way].nodes[i_node];
+                // Split the way
+                let i_new_way = ways_split_at_intersections.push(JSON.parse(JSON.stringify(ways[i_way]))) - 1;
+                ways_split_at_intersections[i_new_way].nodes =
+                    ways[i_way].nodes.slice(i_node_start, i_node + 1);
+                    // Slice 2nd parameter is an index that is not included in the sliced array, so take the next index here
+
+                i_node_start = i_node;
             }
         }
+
+        let i_new_way = ways_split_at_intersections.push(ways[i_way]) - 1;
+        ways_split_at_intersections[i_new_way].nodes = ways[i_way].nodes.slice(i_node_start,  ways[i_way].nodes.length - 1);
     }
 
-    return nodes_intersection;
+    ways_split_at_intersections = ways_split_at_intersections.filter(way => way.nodes.length != 0);
+    return ways_split_at_intersections;
 }
