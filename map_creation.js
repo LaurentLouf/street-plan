@@ -45,6 +45,14 @@ function processOSMData(osm_map_data_highways) {
             })[0];
         });
 
+        if ( ways[i_way].tags.highway == "primary" || ways[i_way].tags.highway == "secondary" )
+        {
+            ways[i_way].tags["transit"] = true;
+        }
+        else {
+            ways[i_way].tags["transit"] = false;
+        }
+
         // For each of its nodes
         for ( var i_node = 0; i_node < ways[i_way].nodes.length; i_node++ )
         {
