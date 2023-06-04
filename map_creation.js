@@ -1,3 +1,38 @@
+let polygon = null;
+
+
+function mapCreationBegin(map){
+    let map_dom = document.getElementById("map");
+    let overlay = document.createElement('div');
+    overlay.innerHTML = "Cliquez pour définir les limites de votre carte";
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.position = "absolute" ;
+    overlay.style.zIndex = 1000;
+    overlay.style.backgroundColor = "rgba(0,0,0,0.3)";
+    overlay.style.color = "white";
+    overlay.style.fontWeight = 800;
+    overlay.style.display = "flex";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+    overlay.style.fontSize = "2em";
+    overlay.addEventListener("click", function (event){
+        console.log(event);
+        event.target.remove();
+        event.stopPropagation();
+        map.on("click", function (event){
+            if ( polygon == null ) {
+                polygon = new L.polygon([], {
+                    fill: true, fillColor: "black", fillOpacity: 0.2,
+                    color: "black", opacity: 0.5});
+                polygon.addTo(map);
+            }
+            polygon.addLatLng(event.latlng);
+        })
+    })
+    map_dom.appendChild(overlay)
+}
+
 function getOverpassBounds(bounds) {
     return "(" + bounds[0]['lat'] + "," + bounds[0]['lng'] + "," + bounds[1]['lat'] + "," + bounds[1]['lng'] + ")" ;
 }
