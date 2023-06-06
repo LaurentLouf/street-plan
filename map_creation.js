@@ -14,6 +14,7 @@ function createPolygonBoundsSelection(event){
 
 function getOSMDataDraw() {
     map.off("click", createPolygonBoundsSelection);
+    L.DomUtil.removeClass(map._container,'crosshair-cursor-enabled');
     let bounds = polygon.getBounds();
     polygon.remove();
     polygon = null ;
@@ -58,6 +59,7 @@ function mapCreationBegin(map){
         event.target.remove();
         event.stopPropagation();
         map.on("click", createPolygonBoundsSelection);
+        L.DomUtil.addClass(map._container,'crosshair-cursor-enabled');
     });
     map_dom.appendChild(overlay);
 }
