@@ -5,12 +5,39 @@ function createPolygonBoundsSelection(event){
         polygon = new L.polygon([], {
             fill: true, fillColor: "black", fillOpacity: 0.2,
             color: "black", opacity: 0.5});
+        polygon.on("click", getOSMDataDraw)
         polygon.addTo(map);
     }
 
     polygon.addLatLng(event.latlng);
 }
 
+function getOSMDataDraw() {
+    map.off("click", createPolygonBoundsSelection);
+    let bounds = polygon.getBounds();
+    polygon.remove();
+    polygon = null ;
+    fetchOSMData(bounds).then(ways => {
+        ways.forEach(way =>
+        {
+            let polyline_coordinates = [];
+            way.nodes.forEach(node => {
+                polyline_coordinates.push([node.lat, node.lon]);
+            })
+            let polyline = L.polyline(polyline_coordinates, {weight: (way.tags.transit ? 3.0 : 1.0)}).arrowheads();
+            polyline.feature = {};
+            polyline.feature.type = "Feature";
+            polyline.feature.properties = way.tags;
+            polyline.feature.properties["start"] = way.nodes[0].id;
+            polyline.feature.properties["end"] = way.nodes[way.nodes.length - 1].id;
+            polyline.feature.properties["direction"] = Direction.BASE;
+            polyline.feature.properties["base"] = polyline.feature.properties["direction"];
+            polyline.on('click', reverseArrow);
+            streets.addLayer(polyline);
+        })
+    });
+    streets.addTo(map);
+}
 
 function mapCreationBegin(map){
     let map_dom = document.getElementById("map");
@@ -36,7 +63,7 @@ function mapCreationBegin(map){
 }
 
 function getOverpassBounds(bounds) {
-    return "(" + bounds[0]['lat'] + "," + bounds[0]['lng'] + "," + bounds[1]['lat'] + "," + bounds[1]['lng'] + ")" ;
+    return "(" + bounds.getSouth() + "," + bounds.getWest() + "," + bounds.getNorth() + "," + bounds.getEast() + ")" ;
 }
 
 async function fetchOSMData(bounds) {
