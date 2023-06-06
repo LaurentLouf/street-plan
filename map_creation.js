@@ -1,5 +1,16 @@
 let polygon = null;
 
+function createPolygonBoundsSelection(event){
+    if ( polygon == null ) {
+        polygon = new L.polygon([], {
+            fill: true, fillColor: "black", fillOpacity: 0.2,
+            color: "black", opacity: 0.5});
+        polygon.addTo(map);
+    }
+
+    polygon.addLatLng(event.latlng);
+}
+
 
 function mapCreationBegin(map){
     let map_dom = document.getElementById("map");
@@ -16,21 +27,12 @@ function mapCreationBegin(map){
     overlay.style.alignItems = "center";
     overlay.style.justifyContent = "center";
     overlay.style.fontSize = "2em";
-    overlay.addEventListener("click", function (event){
-        console.log(event);
+    overlay.addEventListener("click", (event) => {
         event.target.remove();
         event.stopPropagation();
-        map.on("click", function (event){
-            if ( polygon == null ) {
-                polygon = new L.polygon([], {
-                    fill: true, fillColor: "black", fillOpacity: 0.2,
-                    color: "black", opacity: 0.5});
-                polygon.addTo(map);
-            }
-            polygon.addLatLng(event.latlng);
-        })
-    })
-    map_dom.appendChild(overlay)
+        map.on("click", createPolygonBoundsSelection);
+    });
+    map_dom.appendChild(overlay);
 }
 
 function getOverpassBounds(bounds) {
