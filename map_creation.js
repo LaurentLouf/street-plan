@@ -19,11 +19,19 @@ function getOSMDataDraw() {
     polygon.remove();
     polygon = null ;
     fetchOSMData(bounds).then(ways => {
+        transitStreet = {};
+
         ways.forEach(way =>
         {
             let polyline_coordinates = [];
             way.nodes.forEach(node => {
                 polyline_coordinates.push([node.lat, node.lon]);
+                if ( way.tags.transit ) {
+                    if ( typeof transitStreet[way.id] == "undefined" ) {
+                        transitStreet[way.id] = new Set();
+                    }
+                    transitStreet[way.id].add(node.id);
+                }
             })
             let polyline = L.polyline(polyline_coordinates, {weight: (way.tags.transit ? 3.0 : 1.0)}).arrowheads();
             polyline.feature = {};
