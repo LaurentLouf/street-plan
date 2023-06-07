@@ -37,7 +37,7 @@ function buildGraphfromPairs(pairs) {
 function depthFirstSearch(graph, start, labels, path = [], visited = new Set()) {
     visited.add(start);
     path = path.concat(start);
-    if (labels.has(start)) {
+    if (labels.indexOf(start) != -1) {
         return [path];
     }
     let paths = [];
@@ -53,18 +53,14 @@ function depthFirstSearch(graph, start, labels, path = [], visited = new Set()) 
 }
 
 function getRatRuns(graph, transitStreet, transitExceptions) {
-    transitNodesAll = new Set();
-    for (let s of transitStreet) {
-        for (let n of getUniqueElements(s)) {
-            transitNodesAll.add(n);
-        }
-    }
-
     let ratRuns = [];
-    for (let transit of transitStreet) {
-        let startNodes = getUniqueElements(transit);
+    for (let way_id in transitStreet) {
+        let startNodes = transitStreet[way_id];
         for (let start of startNodes) {
-            let destinationNodes = new Set([...transitNodesAll].filter(x => !startNodes.has(x)));
+            let destinationNodes =
+                Object.entries(transitStreet)
+                .filter(entry => entry[0] != way_id)
+                .map(entry => Array.from(entry[1])).flat(5)  ;
             if (transitExceptions && transitExceptions[start]) {
                 destinationNodes = new Set([...destinationNodes].filter(x => !transitExceptions[start].includes(x)));
             }
