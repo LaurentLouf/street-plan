@@ -105,16 +105,16 @@ function reverseArrow(ev) {
     // Change the color of the polyline
     // BASE > REVERSE > DOUBLE > NONE > BASE > ...
     var arrowColor;
-    if (polyline._direction === Direction.BASE) {
+    if (polyline.feature.properties.direction === Direction.BASE) {
         // From BASE to REVERSE
-        polyline._direction = Direction.REVERSE;
+        polyline.feature.properties.direction = Direction.REVERSE;
         arrowColor = "green";
         polyline.setStyle({color : arrowColor});
         polyline.setLatLngs(polyline.getLatLngs().reverse()); // also applies the style changes to the arrowhead
 
-    } else if (polyline._direction === Direction.REVERSE) {
+    } else if (polyline.feature.properties.direction === Direction.REVERSE) {
         // From REVERSE to DOUBLE
-        polyline._direction = Direction.DOUBLE;
+        polyline.feature.properties.direction = Direction.DOUBLE;
         arrowColor = (polyline._base === Direction.DOUBLE) ? "blue" : "green";
         polyline.setStyle({color : arrowColor});
         polyline.setLatLngs(polyline.getLatLngs().reverse()); // reset
@@ -122,9 +122,9 @@ function reverseArrow(ev) {
         // Set double-arrow
         addDoubleArrow(polyline, arrowColor);
 
-    } else if (polyline._direction === Direction.DOUBLE) {
+    } else if (polyline.feature.properties.direction === Direction.DOUBLE) {
         // From DOUBLE to NONE
-        polyline._direction = Direction.NONE;
+        polyline.feature.properties.direction = Direction.NONE;
         arrowColor = (polyline._base === Direction.NONE) ? "blue" : "green";
         polyline.getArrowheads().remove();
         polyline.setStyle({color : arrowColor, dashArray: Constant.MODAL_FILTER_DASH });
@@ -132,7 +132,7 @@ function reverseArrow(ev) {
 
     } else {
         // From NONE to BASE
-        polyline._direction = Direction.BASE;
+        polyline.feature.properties.direction = Direction.BASE;
         arrowColor = (polyline._base === Direction.BASE) ? "blue" : "green";
         polyline.getArrowheads().addTo(map);
         polyline.setStyle({color : arrowColor, dashArray: ''});
@@ -219,9 +219,9 @@ function buildGraph(polylineLayerGroup) {
     let pairs = [];
     polylineLayerGroup.eachLayer(function(polyline){
 
-        let direction = polyline['_direction'];
-        let start = polyline['_point_start'];
-        let end = polyline['_point_end'];
+        let direction = polyline.feature.properties.direction;
+        let start = polyline.feature.properties.start;
+        let end = polyline.feature.properties.end;
 
         if (direction === Direction.BASE) {
             pairs.push([start, end]);
@@ -243,8 +243,8 @@ function markRatRuns(streets, ratRuns) {
         }
     }
     streets.eachLayer(function(polyline) {
-        let start = polyline['_point_start'];
-        let end = polyline['_point_end'];
+        let start = polyline.feature.properties.start;
+        let end = polyline.feature.properties.end;
         polyline._rat_run = ratRunPairs.has(JSON.stringify([start,end])) || ratRunPairs.has(JSON.stringify([end,start]));
     });
 }
