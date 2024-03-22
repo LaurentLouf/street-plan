@@ -1,5 +1,6 @@
 let polygon = null;
 
+// Add a point to the polygon that represents the bounds of the zone of interest
 function createPolygonBoundsSelection(event){
     if ( polygon == null ) {
         polygon = new L.polygon([], {
@@ -12,6 +13,7 @@ function createPolygonBoundsSelection(event){
     polygon.addLatLng(event.latlng);
 }
 
+// Get the OSM data inside of the polygon, then draw the map
 function getOSMDataDraw() {
     map.off("click", createPolygonBoundsSelection);
     L.DomUtil.removeClass(map._container,'crosshair-cursor-enabled');
@@ -23,6 +25,7 @@ function getOSMDataDraw() {
 
         ways.forEach(way =>
         {
+            // Create a line from all the nodes of the way and add nodes to transitStreet
             let polyline_coordinates = [];
             way.nodes.forEach(node => {
                 polyline_coordinates.push([node.lat, node.lon]);
@@ -33,13 +36,19 @@ function getOSMDataDraw() {
                     transitStreet[way.id].add(node.id);
                 }
             })
-            let polyline = L.polyline(polyline_coordinates, {weight: (way.tags.transit ? 3.0 : 1.0)}).arrowheads();
+            let polyline = L.polyline(polyline_coordinates, {weight: (way.tags.transit ? 6.0 : 2.0)}).arrowheads();
             polyline.feature = {};
             polyline.feature.type = "Feature";
             polyline.feature.properties = way.tags;
             polyline.feature.properties["start"] = way.nodes[0].id;
             polyline.feature.properties["end"] = way.nodes[way.nodes.length - 1].id;
-            polyline.feature.properties["direction"] = Direction.BASE;
+            if ( typeof polyline.feature.properties["oneway"] == "undefined"
+                    || typeof polyline.feature.properties["oneway"] == "no" ) {
+                polyline.feature.properties["direction"] = Direction.DOUBLE;
+            } else {
+                polyline.feature.properties["direction"] = Direction.BASE;
+            }
+
             polyline.feature.properties["base"] = polyline.feature.properties["direction"];
             polyline.on('click', reverseArrow);
             streets.addLayer(polyline);
